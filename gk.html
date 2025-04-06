@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>IN the mood for SHR(u)A</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.2/dist/gsap.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+  <style>
+    body {
+      background: linear-gradient(to bottom right, #e0d4f7, #c6c9f5);
+      overflow-x: hidden;
+    }
+
+    #letterText {
+      font-family: 'Cormorant Garamond', serif;
+    }
+
+    .bounce {
+      animation: subtleBounce 1.2s ease;
+    }
+
+    @keyframes subtleBounce {
+      0% {
+        transform: scale(1);
+      }
+
+      30% {
+        transform: scale(1.03);
+      }
+
+      60% {
+        transform: scale(0.98);
+      }
+
+      100% {
+        transform: scale(1);
+      }
+    }
+  </style>
+</head>
+<body class="bg-gradient-to-br from-purple-100 to-indigo-100 text-gray-800 font-mono">
+  <div class="w-full px-4 py-8 relative z-10">
+    <h1 id="pageTitle" class="text-2xl sm:text-3xl font-bold text-center mb-6">I will always be in the mood for SHRU</h1>
+
+    <div id="gatekeeper" class="bg-white p-4 sm:p-6 rounded-lg shadow-md text-center max-w-md mx-auto">
+      <div id="triggerZone" class="cursor-pointer">
+        <div id="letterText" class="text-left text-sm text-gray-600">
+          Dear INSHRA,<br><br>
+          I hope this letter finds you in good a mood.<br>
+          Throughout the journey, there has been hints for the reveal.<br><br>
+          Will Always love,<br>
+          Safi
+        </div>
+      </div>
+
+      <div id="sourceBox" class="flex flex-wrap gap-2 justify-center mb-4 p-2 border-2 border-dashed border-purple-300 min-h-[80px] bg-purple-50 rounded-lg relative overflow-hidden hidden"></div>
+      <div id="answerBox" class="flex flex-wrap gap-2 justify-center mb-4 p-2 border-2 border-purple-500 bg-white rounded-lg min-h-[80px]"></div>
+
+      <button onclick="checkArrangement()" class="w-full bg-purple-500 text-white py-2 rounded hover:bg-purple-600 text-sm">Enter</button>
+      <p id="errorText" class="text-red-500 mt-2 hidden text-sm">Hmm, try again with the right arrangement.</p>
+    </div>
+  </div>
+
+  <script>
+    const correctPhrase = "in the mood for shru";
+    const sourceBox = document.getElementById("sourceBox");
+    const answerBox = document.getElementById("answerBox");
+    const letterDiv = document.getElementById("letterText");
+    const triggerZone = document.getElementById("triggerZone");
+    const pageTitle = document.getElementById("pageTitle");
+
+    const letterWords = ["i", "will", "always", "be", "in", "the", "mood", "for", "shru"];
+    let clickCount = 0;
+
+    function shuffle(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+      return array;
+    }
+
+    function activateTiles() {
+      gsap.to(letterDiv, {
+        duration: 0.5,
+        opacity: 0,
+        y: -20,
+        onComplete: () => {
+          letterDiv.style.display = 'none';
+          sourceBox.classList.remove("hidden");
+          pageTitle.textContent = "Caught You!";
+
+          const shuffledWords = shuffle([...letterWords]);
+
+          shuffledWords.forEach((word) => {
+            const span = document.createElement("span");
+            span.textContent = word;
+            span.className = "px-3 py-1 bg-purple-100 rounded-full opacity-0 translate-y-[-20px] inline-block m-1 select-none";
+            span.setAttribute("data-word", word);
+            sourceBox.appendChild(span);
+          });
+
+          gsap.to("#sourceBox span", {
+            opacity: 1,
+            y: 0,
+            duration: 0.5,
+            stagger: 0.05,
+            onComplete: () => {
+              document.querySelectorAll("#sourceBox span").forEach(el => {
+                el.classList.add("cursor-move", "bg-purple-200");
+              });
+              new Sortable(sourceBox, {
+                group: "words",
+                animation: 150
+              });
+
+              new Sortable(answerBox, {
+                group: "words",
+                animation: 150
+              });
+            }
+          });
+        }
+      });
+    }
+
+    triggerZone.addEventListener("click", () => {
+      clickCount++;
+      triggerZone.classList.add("bounce");
+      setTimeout(() => triggerZone.classList.remove("bounce"), 1200);
+      if (clickCount === 10) {
+        activateTiles();
+      }
+    });
+
+    function checkArrangement() {
+      const arrangedWords = Array.from(answerBox.children).map(el => el.dataset.word).join(" ").toLowerCase();
+      if (arrangedWords === correctPhrase) {
+        window.location.href = "proposal.html";
+      } else {
+        document.getElementById('errorText').classList.remove('hidden');
+      }
+    }
+  </script>
+</body>
+</html>
